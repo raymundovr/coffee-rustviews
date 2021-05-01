@@ -31,8 +31,8 @@ impl CoffeeConfig {
     pub fn load() -> Result<Self, config::ConfigError> {
         let mut settings = config::Config::default();
         settings
-            // Load from Settings.toml file
-            .merge(config::File::with_name("config"))
+            // Load from config.json file
+            .merge(config::File::with_name("config.json"))
             .unwrap()
             // Load from ENV_VARS prefixed with APP
             .merge(config::Environment::with_prefix("APP"))
