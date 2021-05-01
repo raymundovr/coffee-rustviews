@@ -4,10 +4,10 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Gitlab {
-    base_url: String,
-    include_wip: Option<bool>,
-    projects: Option<Vec<String>>,
-    token: String,
+    pub base_url: String,
+    pub include_wip: Option<bool>,
+    pub projects: Option<Vec<String>>,
+    pub token: String,
 }
 
 #[derive(Clone, Deserialize, Debug)]
@@ -39,5 +39,16 @@ impl CoffeeConfig {
             .unwrap();
 
         settings.try_into()
+    }
+}
+
+impl Gitlab {
+    pub fn new(base_url: String, token: String) -> Self {
+        Gitlab {
+            base_url,
+            token,
+            include_wip: None,
+            projects: None,
+        }
     }
 }
