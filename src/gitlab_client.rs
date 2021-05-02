@@ -43,7 +43,8 @@ mod tests {
             },
             "created_at": "2021-05-01T00:00:00Z",
             "upvotes": 1,
-            "web_url": "https://test.gitlab.com/projects/x/mrs/1"
+            "web_url": "https://test.gitlab.com/projects/x/mrs/1",
+            "other_field": "Shouldn't be in the DS"
         }"#;
         
         let mock = server.mock(|when, then| {
