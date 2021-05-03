@@ -1,6 +1,6 @@
+use crate::coffee_config::Gitlab;
 use reqwest;
 use serde::Deserialize;
-use crate::coffee_config::Gitlab;
 
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct MergeRequest {
@@ -20,23 +20,24 @@ impl MergeRequest {
     pub async fn get_open(config: &Gitlab) -> Result<Vec<Self>, Box<dyn std::error::Error>> {
         let url = format!("{}/merge_requests?state=opened", config.base_url);
         let client = reqwest::Client::new();
-        let response = client.get(&url)
+        let response = client
+            .get(&url)
             .header("PRIVATE-TOKEN", &config.token)
             .send()
             .await?
             .json::<Vec<MergeRequest>>()
             .await?;
-        
+
         Ok(response)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use httpmock::Method::GET;
     use httpmock::MockServer;
-    use super::*;
-    
+
     #[tokio::test]
     async fn it_loads_single_merge_request() {
         let server = MockServer::start();
@@ -50,7 +51,7 @@ mod tests {
             "web_url": "https://test.gitlab.com/projects/x/mrs/1",
             "other_field": "Shouldn't be in the DS"
         }]"#;
-        
+
         let mock = server.mock(|when, then| {
             when.method(GET).header("PRIVATE-TOKEN", "TOKEN");
             then.status(200)
@@ -63,20 +64,25 @@ mod tests {
         mock.assert();
         assert_eq!(response.is_ok(), true);
         let result = response.unwrap();
-        assert_eq!(result, vec![MergeRequest {
-            title: "Whatever".to_string(),
-            author: Author { name: "Author Name".to_string() },
-            created_at: "2021-05-01T00:00:00Z".to_string(),
-            upvotes: 1,
-            web_url: "https://test.gitlab.com/projects/x/mrs/1".to_string(),
-        }]);
+        assert_eq!(
+            result,
+            vec![MergeRequest {
+                title: "Whatever".to_string(),
+                author: Author {
+                    name: "Author Name".to_string()
+                },
+                created_at: "2021-05-01T00:00:00Z".to_string(),
+                upvotes: 1,
+                web_url: "https://test.gitlab.com/projects/x/mrs/1".to_string(),
+            }]
+        );
     }
 
     #[tokio::test]
     async fn it_loads_empty_response() {
         let server = MockServer::start();
         let data = r#"[]"#;
-        
+
         let mock = server.mock(|when, then| {
             when.method(GET).header("PRIVATE-TOKEN", "TOKEN");
             then.status(200)

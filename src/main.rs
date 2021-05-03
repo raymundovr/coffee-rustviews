@@ -1,5 +1,6 @@
 mod coffee_config;
 mod gitlab_client;
+mod post_message;
 use coffee_config::CoffeeConfig;
 use gitlab_client::MergeRequest;
 
