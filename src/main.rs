@@ -1,8 +1,11 @@
 mod coffee_config;
 mod gitlab_client;
 use coffee_config::CoffeeConfig;
+use gitlab_client::MergeRequest;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let config = CoffeeConfig::load().unwrap();
-
+    let mrs = MergeRequest::get_open(&config.gitlab).await;
+    println!("{:?}", mrs);
 }

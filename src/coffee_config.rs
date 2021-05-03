@@ -12,19 +12,19 @@ pub struct Gitlab {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Publish {
-    slack: Option<PublishChannel>,
-    teams: Option<PublishChannel>,
+    pub slack: Option<PublishChannel>,
+    pub teams: Option<PublishChannel>,
 }
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct PublishChannel {
-    webhook_url: String,
+    pub webhook_url: String,
 }
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct CoffeeConfig {
-    gitlab: Gitlab,
-    publish: Publish,
+    pub gitlab: Gitlab,
+    pub publish: Publish,
 }
 
 impl CoffeeConfig {
