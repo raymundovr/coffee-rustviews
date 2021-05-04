@@ -32,22 +32,11 @@ impl CoffeeConfig {
         settings
             // Load from config.json file
             .merge(config::File::with_name("config.json"))
-            .unwrap()
-            // Load from ENV_VARS prefixed with APP
-            .merge(config::Environment::with_prefix("APP"))
             .unwrap();
+            // Load from ENV_VARS prefixed with APP
+            // .merge(config::Environment::with_prefix("APP"))
+            // .unwrap();
 
         settings.try_into()
-    }
-}
-
-impl Gitlab {
-    pub fn new(base_url: String, token: String) -> Self {
-        Gitlab {
-            base_url,
-            token,
-            include_wip: None,
-            projects: None,
-        }
     }
 }

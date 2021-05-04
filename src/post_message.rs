@@ -1,5 +1,5 @@
-use crate::coffee_config::{Publish, PublishChannel};
-use crate::gitlab_client::{Author, MergeRequest};
+use crate::coffee_config::Publish;
+use crate::gitlab_client::MergeRequest;
 use reqwest;
 use serde::Serialize;
 
@@ -8,40 +8,31 @@ struct SlackMessage {
     text: String,
 }
 
-fn format_mrkdwn(merge_request: &MergeRequest) -> String {
-    format!(
-        "<{}|{}> by {} opened on *{}*. Upvotes: {}",
-        merge_request.web_url,
-        merge_request.title,
-        merge_request.author.name,
-        merge_request.created_at,
-        merge_request.upvotes
-    )
-}
-
-fn format_markdown(merge_request: &MergeRequest) -> String {
-    format!(
-        "[{}]({}) by {} opened on __{}__. Upvotes: {}",
-        merge_request.web_url,
-        merge_request.title,
-        merge_request.author.name,
-        merge_request.created_at,
-        merge_request.upvotes
-    )
+#[derive(Debug, Serialize)]
+struct TeamsMessage {
+    title: String,
+    text: String,
 }
 
 impl SlackMessage {
-    fn new(merge_requests: &Vec<MergeRequest>) -> Self {
+    fn new(title: &str, merge_requests: &Vec<MergeRequest>) -> Self {
         let messages: Vec<String> = merge_requests
             .into_iter()
-            .map(|mr| format_mrkdwn(&mr))
+            .map(|mr| format!(
+                "<{}|{}> by {} opened on *{}*. Upvotes: {}",
+                mr.web_url,
+                mr.title,
+                mr.author.name,
+                mr.created_at,
+                mr.upvotes
+            ))
             .collect();
-        println!("{:?}", messages);
         SlackMessage {
-            text: messages.join("\n")
+            text: format!("{}\n{}", title, messages.join("\n"))
         }
     }
 
+    // This method could be shared but async traits are currently not supported
     async fn post_to_webhook(
         &self,
         webhook_url: &str
@@ -56,26 +47,59 @@ impl SlackMessage {
     }
 }
 
+impl TeamsMessage {
+    fn new(title: &str, merge_requests: &Vec<MergeRequest>) -> Self {
+        let messages: Vec<String> = merge_requests
+            .into_iter()
+            .map(|mr| format!(
+                "[{}]({}) by {} opened on __{}__. Upvotes: {}",
+                mr.web_url,
+                mr.title,
+                mr.author.name,
+                mr.created_at,
+                mr.upvotes
+            ))
+            .collect();
+        TeamsMessage {
+            title: title.to_string(),
+            text: messages.join("\n")
+        }
+    }
+
+    // This method could be shared but async traits are currently not supported
+    async fn post_to_webhook(
+        &self,
+        webhook_url: &str
+    ) -> Result<bool, Box<dyn std::error::Error>> {
+        let client = reqwest::Client::new();
+        let res = client.post(webhook_url).json(self).send().await?;
+    
+        match res.error_for_status() {
+            Ok(_res) => Ok(true),
+            Err(_err) => Ok(false),
+        }
+    }
+}
+
+
 pub async fn post_messages(
     merge_requests: &Vec<MergeRequest>,
     config: &Publish,
 ) -> Result<usize, Box<dyn std::error::Error>> {
     let mut success = 0;
+    let salutation = "Hi, there are some merge requests to review";
     if let Some(slack_config) = config.slack.clone() {
         println!("Posting message to Slack");
-        let message = SlackMessage::new(merge_requests);
-        let result = message.post_to_webhook(&slack_config.webhook_url).await?;
+        let message = SlackMessage::new(salutation, merge_requests);
+        let _result = message.post_to_webhook(&slack_config.webhook_url).await?;
         success += 1;
     }
 
     if let Some(teams_config) = config.teams.clone() {
         println!("Posting message to Teams");
-        let messages: Vec<String> = merge_requests
-            .into_iter()
-            .map(|mr| format_markdown(&mr))
-            .collect();
-        println!("{:?}", messages);
-        success += messages.len();
+        let message = TeamsMessage::new(salutation, merge_requests);
+        let _result = message.post_to_webhook(&teams_config.webhook_url).await?;
+        success += 1;
     }
 
     Ok(success)
@@ -86,6 +110,8 @@ mod tests {
     use super::*;
     use httpmock::MockServer;
     use httpmock::Method::POST;
+    use crate::coffee_config::PublishChannel;
+    use crate::gitlab_client::Author;
 
     #[tokio::test]
     async fn post_to_slack() {
@@ -117,9 +143,15 @@ mod tests {
 
     #[tokio::test]
     async fn post_to_teams() {
+        let server = MockServer::start();
+        let mock = server.mock(|when, then| {
+            when.method(POST).header("Content-Type", "application/json");
+            then.status(200);
+        });
+
         let config = Publish {
             teams: Some(PublishChannel {
-                webhook_url: "https://teams.webhook.com/channel".to_string(),
+                webhook_url: server.base_url().to_string(),
             }),
             slack: None,
         };
@@ -133,6 +165,7 @@ mod tests {
             web_url: "https://test.gitlab.com/projects/x/mrs/1".to_string(),
         }];
         let result = post_messages(&merge_requests, &config).await.unwrap();
+        mock.assert();
         assert_eq!(result, 1);
     }
 }

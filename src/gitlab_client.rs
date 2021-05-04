@@ -58,7 +58,12 @@ mod tests {
                 .header("Content-Type", "application/json")
                 .body(data);
         });
-        let config = Gitlab::new(server.base_url().to_string(), "TOKEN".to_string());
+        let config = Gitlab {
+            base_url: server.base_url().to_string(),
+            token: "TOKEN".to_string(),
+            include_wip: None,
+            projects: None,
+        };
         let response = MergeRequest::get_open(&config).await;
         // Exactly one HTTP method that matched the mock requirements
         mock.assert();
@@ -89,7 +94,12 @@ mod tests {
                 .header("Content-Type", "application/json")
                 .body(data);
         });
-        let config = Gitlab::new(server.base_url().to_string(), "TOKEN".to_string());
+        let config = Gitlab {
+            base_url: server.base_url().to_string(),
+            token: "TOKEN".to_string(),
+            include_wip: None,
+            projects: None,
+        };
         let response = MergeRequest::get_open(&config).await;
         // Exactly one HTTP method that matched the mock requirements
         mock.assert();
