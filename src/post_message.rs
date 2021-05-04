@@ -87,7 +87,7 @@ pub async fn post_messages(
     config: &Publish,
 ) -> Result<usize, Box<dyn std::error::Error>> {
     let mut success = 0;
-    let salutation = "Hi, there are some merge requests to review";
+    let salutation = "Hi! There are some Merge Requests to review :)";
     if let Some(slack_config) = config.slack.clone() {
         println!("Posting message to Slack");
         let message = SlackMessage::new(salutation, merge_requests);

@@ -6,13 +6,12 @@ Got time for a coffee? Why not reviewing some code while enjoying it?
 
 ## Requirements
 
-- Node.js >= 11
+- Rust >= 1.40
 
 ## Getting started
 
 1. Clone this project
-2. Install dependencies by executing `npm install`
-3. Build the application by executing `npm run build`
+2. Build the application by executing `cargo build --release`
 
 ## Configuration
 
@@ -70,7 +69,11 @@ Once you have registered the connector in your channel you can specify the url i
 
 ## Running the app
 
-`CONFIG_FILE=/path/to/config.json node dist/app.js`
+Create a `config.json` file that includes all your configuration settings.
+
+Then execute:
+
+`cargo run`
 
 This command will print a message indicating the Merge Requests posted and a confirmation on the number of messages posted (all merge requests go in one message).
 
@@ -94,16 +97,12 @@ The best use case scenario is when this script is executed by a Cron job.
 
 For Linux systems there's an abundance of information on the topic, but can be quickly resumed as follows.
 
-1. Create a bash script to run coffee-scripts.
-
-Mainly you need to specify the path to `CONFIG_FILE` and the path to the node executable (obtain this by running `which node` in your terminal) followed by the path to the built app.js.
+1. Build the release binary
 
 ```bash
-# coffee-scripts.sh
-echo "Running coffee-scripts"
-export CONFIG_FILE=/path/to/config.json
-/usr/bin/node /path/to/coffee-reviews/dist/app.js
+$ cargo build --release
 ```
+This creates a target/release folder inside the project's folder.
 
 2. Run the bash script from a cron job
 ```bash
@@ -114,7 +113,7 @@ $ crontab -e
 Inside the cronfile add the path to the bash script that you just created. In this example the command will be executed everyday at 9:00 am (coffee time for my team).
 
 ```
-0 9 * * *  /path/to/coffee-scripts.sh 
+0 9 * * *  /path/to/coffee-rustviews/target/release/coffe-rustviews
 ```
 
 Save the changes.
