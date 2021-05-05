@@ -16,7 +16,7 @@ struct TeamsMessage {
 
 async fn post_to_webhook<T: Serialize>(
     message: &T,
-    webhook_url: &str
+    webhook_url: &str,
 ) -> Result<bool, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let res = client.post(webhook_url).json(message).send().await?;
@@ -31,42 +31,36 @@ impl SlackMessage {
     fn new(title: &str, merge_requests: &Vec<MergeRequest>) -> Self {
         let messages: Vec<String> = merge_requests
             .into_iter()
-            .map(|mr| format!(
-                "<{}|{}> by {} opened on *{}*. Upvotes: {}",
-                mr.web_url,
-                mr.title,
-                mr.author.name,
-                mr.created_at,
-                mr.upvotes
-            ))
+            .map(|mr| {
+                format!(
+                    "<{}|{}> by {} opened on *{}*. Upvotes: {}",
+                    mr.web_url, mr.title, mr.author.name, mr.created_at, mr.upvotes
+                )
+            })
             .collect();
         SlackMessage {
-            text: format!("{}\n{}", title, messages.join("\n"))
+            text: format!("{}\n{}", title, messages.join("\n")),
         }
     }
-    
 }
 
 impl TeamsMessage {
     fn new(title: &str, merge_requests: &Vec<MergeRequest>) -> Self {
         let messages: Vec<String> = merge_requests
             .into_iter()
-            .map(|mr| format!(
-                "[{}]({}) by {} opened on __{}__. Upvotes: {}",
-                mr.web_url,
-                mr.title,
-                mr.author.name,
-                mr.created_at,
-                mr.upvotes
-            ))
+            .map(|mr| {
+                format!(
+                    "[{}]({}) by {} opened on __{}__. Upvotes: {}",
+                    mr.web_url, mr.title, mr.author.name, mr.created_at, mr.upvotes
+                )
+            })
             .collect();
         TeamsMessage {
             title: title.to_string(),
-            text: messages.join("\n")
+            text: messages.join("\n"),
         }
     }
 }
-
 
 pub async fn post_messages(
     merge_requests: &Vec<MergeRequest>,
@@ -94,13 +88,13 @@ pub async fn post_messages(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use httpmock::MockServer;
-    use httpmock::Method::POST;
     use crate::coffee_config::PublishChannel;
     use crate::gitlab_client::Author;
+    use httpmock::Method::POST;
+    use httpmock::MockServer;
 
     #[tokio::test]
-    async fn post_to_slack() {
+    async fn posts_to_slack() {
         let server = MockServer::start();
         let mock = server.mock(|when, then| {
             when.method(POST).header("Content-Type", "application/json");
@@ -121,6 +115,7 @@ mod tests {
             created_at: "2021-05-01T00:00:00Z".to_string(),
             upvotes: 1,
             web_url: "https://test.gitlab.com/projects/x/mrs/1".to_string(),
+            work_in_progress: false
         }];
         let result = post_messages(&merge_requests, &config).await.unwrap();
         mock.assert();
@@ -128,7 +123,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn post_to_teams() {
+    async fn posts_to_teams() {
         let server = MockServer::start();
         let mock = server.mock(|when, then| {
             when.method(POST).header("Content-Type", "application/json");
@@ -149,6 +144,7 @@ mod tests {
             created_at: "2021-05-01T00:00:00Z".to_string(),
             upvotes: 1,
             web_url: "https://test.gitlab.com/projects/x/mrs/1".to_string(),
+            work_in_progress: false
         }];
         let result = post_messages(&merge_requests, &config).await.unwrap();
         mock.assert();
