@@ -44,8 +44,6 @@ impl SlackMessage {
             text: format!("{}\n{}", title, messages.join("\n"))
         }
     }
-
-    // This method could be shared but async traits are currently not supported
     
 }
 
