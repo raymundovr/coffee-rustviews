@@ -19,16 +19,36 @@ pub struct Author {
 
 impl MergeRequest {
     pub async fn get_open(config: &Gitlab) -> Result<Vec<Self>, Box<dyn std::error::Error>> {
-        let url = format!("{}/merge_requests?state=opened", config.base_url);
+        match &config.projects {
+            None => {
+                let url = format!("{}/merge_requests?state=opened", config.base_url);
+                MergeRequest::get_merge_requests(&url, &config.token, config.include_wip).await
+            },
+            Some(project_ids) => {
+                let mut merge_requests: Vec<Self> = vec![];
+                for id in project_ids {
+                    let url = format!("{}/projects/{}/merge_requests?state=opened", config.base_url, id);
+                    let result = MergeRequest::get_merge_requests(&url, &config.token, config.include_wip).await;
+                    if let Ok(mut mrs) = result {
+                        merge_requests.append(&mut mrs);
+                    }
+                }
+
+                Ok(merge_requests)
+            }
+        }
+    }
+
+    async fn get_merge_requests(url: &str, token: &str, include_wip: Option<bool>) -> Result<Vec<Self>, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
         let response = client
-            .get(&url)
-            .header("PRIVATE-TOKEN", &config.token)
+            .get(url)
+            .header("PRIVATE-TOKEN", token)
             .send()
             .await?
             .json::<Vec<MergeRequest>>()
             .await?;
-        let include_wip = config.include_wip == Some(true);
+        let include_wip = include_wip == Some(true);
         let merge_requests: Vec<MergeRequest> = response
             .into_iter()
             .filter(|mr| !mr.work_in_progress || mr.work_in_progress && include_wip)
@@ -235,5 +255,33 @@ mod tests {
             }
         ]);
         mock.assert();
+    }
+
+    #[tokio::test]
+    async fn gets_all_projects() {
+        let server = MockServer::start();
+        let mock = server.mock(|when, then| {
+            when.method(GET).header("PRIVATE-TOKEN", "TOKEN");
+            then.status(200)
+                .header("Content-Type", "application/json")
+                .body(
+                    r#"[]"#,
+                );
+        });
+
+        let config = Gitlab {
+            base_url: server.base_url().to_string(),
+            token: "TOKEN".to_string(),
+            include_wip: Some(true),
+            projects: Some(vec![
+                "one".to_string(),
+                "two".to_string(),
+            ]),
+        };
+
+        let response = MergeRequest::get_open(&config).await;
+        
+        assert_eq!(response.is_ok(), true);
+        mock.assert_hits(2);
     }
 }
