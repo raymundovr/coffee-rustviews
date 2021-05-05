@@ -14,6 +14,19 @@ struct TeamsMessage {
     text: String,
 }
 
+async fn post_to_webhook<T: Serialize>(
+    message: &T,
+    webhook_url: &str
+) -> Result<bool, Box<dyn std::error::Error>> {
+    let client = reqwest::Client::new();
+    let res = client.post(webhook_url).json(message).send().await?;
+
+    match res.error_for_status() {
+        Ok(_res) => Ok(true),
+        Err(_err) => Ok(false),
+    }
+}
+
 impl SlackMessage {
     fn new(title: &str, merge_requests: &Vec<MergeRequest>) -> Self {
         let messages: Vec<String> = merge_requests
@@ -33,18 +46,7 @@ impl SlackMessage {
     }
 
     // This method could be shared but async traits are currently not supported
-    async fn post_to_webhook(
-        &self,
-        webhook_url: &str
-    ) -> Result<bool, Box<dyn std::error::Error>> {
-        let client = reqwest::Client::new();
-        let res = client.post(webhook_url).json(self).send().await?;
     
-        match res.error_for_status() {
-            Ok(_res) => Ok(true),
-            Err(_err) => Ok(false),
-        }
-    }
 }
 
 impl TeamsMessage {
@@ -65,20 +67,6 @@ impl TeamsMessage {
             text: messages.join("\n")
         }
     }
-
-    // This method could be shared but async traits are currently not supported
-    async fn post_to_webhook(
-        &self,
-        webhook_url: &str
-    ) -> Result<bool, Box<dyn std::error::Error>> {
-        let client = reqwest::Client::new();
-        let res = client.post(webhook_url).json(self).send().await?;
-    
-        match res.error_for_status() {
-            Ok(_res) => Ok(true),
-            Err(_err) => Ok(false),
-        }
-    }
 }
 
 
@@ -91,14 +79,14 @@ pub async fn post_messages(
     if let Some(slack_config) = config.slack.clone() {
         println!("Posting message to Slack");
         let message = SlackMessage::new(salutation, merge_requests);
-        let _result = message.post_to_webhook(&slack_config.webhook_url).await?;
+        let _result = post_to_webhook(&message, &slack_config.webhook_url).await?;
         success += 1;
     }
 
     if let Some(teams_config) = config.teams.clone() {
         println!("Posting message to Teams");
         let message = TeamsMessage::new(salutation, merge_requests);
-        let _result = message.post_to_webhook(&teams_config.webhook_url).await?;
+        let _result = post_to_webhook(&message, &teams_config.webhook_url).await?;
         success += 1;
     }
 
