@@ -95,7 +95,7 @@ __Hi! There are some Merge Requests to review :)__
 
 The best use case scenario is when this script is executed by a Cron job.
 
-For Linux systems there's an abundance of information on the topic, but can be quickly resumed as follows.
+Can be quickly resumed as follows.
 
 1. Build the release binary
 
@@ -104,16 +104,6 @@ $ cargo build --release
 ```
 This creates a target/release folder inside the project's folder.
 
-2. Run the bash script from a cron job
-```bash
-# edit your cronjobs
-$ crontab -e
-```
+2. Create a bash script that will execute the release binary from the same path where the `config.json` resides.
 
-Inside the cronfile add the path to the bash script that you just created. In this example the command will be executed everyday at 9:00 am (coffee time for my team).
-
-```
-0 9 * * *  /path/to/coffee-rustviews/target/release/coffe-rustviews
-```
-
-Save the changes.
+3. Edit your cron jobs to execute the bash script.
