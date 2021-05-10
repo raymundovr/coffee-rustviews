@@ -1,4 +1,6 @@
-# Coffee Reviews
+# Coffee Rustviews
+
+[Coffee Reviews](https://gitlab.com/raymundo.vr/coffee-reviews) in 🦀
 
 __Get a notification about pending Merge Requests for your (team's) projects.__
 
