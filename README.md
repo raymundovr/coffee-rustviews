@@ -108,7 +108,7 @@ Can be quickly resumed as follows.
 ```bash
 $ cargo build --release
 ```
-This creates a target/release folder inside the project's folder.
+This creates a target/release folder inside the project's folder that includes the executable file `coffee-rustviews`.
 
 2. Edit your cron jobs to execute the bash script.
 
