@@ -23,7 +23,7 @@ async fn post_to_webhook<T: Serialize>(
 
     match res.error_for_status() {
         Ok(_res) => Ok(true),
-        Err(_err) => Ok(false),
+        Err(_err) => { println!("Error while posting to {:?} {:?}", webhook_url, _err); Ok(false) },
     }
 }
 
@@ -71,15 +71,19 @@ pub async fn post_messages(
     if let Some(slack_config) = config.slack.clone() {
         println!("Posting message to Slack");
         let message = SlackMessage::new(salutation, merge_requests);
-        let _result = post_to_webhook(&message, &slack_config.webhook_url).await?;
-        success += 1;
+        let result = post_to_webhook(&message, &slack_config.webhook_url).await?;
+        if result {
+            success += 1;
+        }
     }
 
     if let Some(teams_config) = config.teams.clone() {
         println!("Posting message to Teams");
         let message = TeamsMessage::new(salutation, merge_requests);
-        let _result = post_to_webhook(&message, &teams_config.webhook_url).await?;
-        success += 1;
+        let result = post_to_webhook(&message, &teams_config.webhook_url).await?;
+        if result {
+            success += 1;
+        }
     }
 
     Ok(success)
@@ -149,5 +153,34 @@ mod tests {
         let result = post_messages(&merge_requests, &config).await.unwrap();
         mock.assert();
         assert_eq!(result, 1);
+    }
+
+    #[tokio::test]
+    async fn post_to_webhook_is_false() {
+        let server = MockServer::start();
+        let mock = server.mock(|when, then| {
+            when.method(POST).header("Content-Type", "application/json");
+            then.status(500);
+        });
+
+        let config = Publish {
+            teams: Some(PublishChannel {
+                webhook_url: server.base_url().to_string(),
+            }),
+            slack: None,
+        };
+        let merge_requests = vec![MergeRequest {
+            title: "Whatever".to_string(),
+            author: Author {
+                name: "Author Name".to_string(),
+            },
+            created_at: "2021-05-01T00:00:00Z".to_string(),
+            upvotes: 1,
+            web_url: "https://test.gitlab.com/projects/x/mrs/1".to_string(),
+            work_in_progress: false
+        }];
+        let result = post_messages(&merge_requests, &config).await.unwrap();
+        mock.assert();
+        assert_eq!(result, 0);
     }
 }
