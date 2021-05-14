@@ -1,5 +1,4 @@
 use crate::coffee_config::Gitlab;
-use reqwest;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -51,7 +50,7 @@ impl MergeRequest {
         let include_wip = include_wip == Some(true);
         let merge_requests: Vec<MergeRequest> = response
             .into_iter()
-            .filter(|mr| !mr.work_in_progress || mr.work_in_progress && include_wip)
+            .filter(|mr| !mr.work_in_progress || include_wip)
             .collect();
         Ok(merge_requests)
     }

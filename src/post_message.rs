@@ -1,6 +1,5 @@
 use crate::coffee_config::Publish;
 use crate::gitlab_client::MergeRequest;
-use reqwest;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
@@ -28,9 +27,9 @@ async fn post_to_webhook<T: Serialize>(
 }
 
 impl SlackMessage {
-    fn new(title: &str, merge_requests: &Vec<MergeRequest>) -> Self {
+    fn new(title: &str, merge_requests: &[MergeRequest]) -> Self {
         let messages: Vec<String> = merge_requests
-            .into_iter()
+            .iter()
             .map(|mr| {
                 format!(
                     "<{}|{}> by {} opened on *{}*. Upvotes: {}",
@@ -45,9 +44,9 @@ impl SlackMessage {
 }
 
 impl TeamsMessage {
-    fn new(title: &str, merge_requests: &Vec<MergeRequest>) -> Self {
+    fn new(title: &str, merge_requests: &[MergeRequest]) -> Self {
         let messages: Vec<String> = merge_requests
-            .into_iter()
+            .iter()
             .map(|mr| {
                 format!(
                     "[{}]({}) by {} opened on __{}__. Upvotes: {}",
@@ -63,7 +62,7 @@ impl TeamsMessage {
 }
 
 pub async fn post_messages(
-    merge_requests: &Vec<MergeRequest>,
+    merge_requests: &[MergeRequest],
     config: &Publish,
 ) -> Result<usize, Box<dyn std::error::Error>> {
     let mut success = 0;
