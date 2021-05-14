@@ -23,7 +23,6 @@ async fn main() {
     ;
     let config_file = matches.value_of("config").unwrap_or("config.json");
     let config = CoffeeConfig::load(config_file).unwrap();
-    println!("Config {:?}", config);
     let mrs = MergeRequest::get_open(&config.gitlab).await.unwrap();
     let result = post_messages(&mrs, &config.publish).await;
     println!("Posted {} Merge Requests. Successful posts: {:?}", mrs.len(), result);
