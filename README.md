@@ -110,10 +110,10 @@ $ cargo build --release
 ```
 This creates a target/release folder inside the project's folder that includes the executable file `coffee-rustviews`.
 
-2. Edit your cron jobs to execute the bash script.
+2. Edit your cron jobs to execute the program.
 
 For example
 ```bash
-0 9 * * *  /path/to/coffee-rustviews -c /path/to/config.json
+0 9 * * *  /path/to/target/release/coffee-rustviews -c /path/to/config.json
 ```
 Will execute the script everyday at 09:00 hrs.
