@@ -1,8 +1,0 @@
-stages:
-  - unit-test
-
-unit-test:
-  stage: unit-test
-  image: rust:latest
-  script:
-    - cargo test --verbose
