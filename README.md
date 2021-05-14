@@ -13,7 +13,7 @@ Got time for a coffee? Why not reviewing some code while enjoying it?
 ## Getting started
 
 1. Clone this project
-2. Build the application by executing `cargo build --release`
+2. Build the application by executing `cargo build`
 
 ## Configuration
 
@@ -75,7 +75,7 @@ Create a `config.json` file that includes all your configuration settings.
 
 Then execute:
 
-`cargo run`
+`cargo run -- -c /path/to/config.json`
 
 This command will print a message indicating the Merge Requests posted and a confirmation on the number of messages posted (all merge requests go in one message).
 
@@ -86,6 +86,10 @@ Posted 4 Merge Requests. Successful posts: 1
 ```
 
 And the corresponding message in your channel.
+
+### Config file argument
+
+If you don't specify a path to your `config.json` using `-c /path/to/config.json` the program will assume that it resides in the current path.
 
 ### Salutation
 
@@ -106,6 +110,4 @@ $ cargo build --release
 ```
 This creates a target/release folder inside the project's folder.
 
-2. Create a bash script that will execute the release binary from the same path where the `config.json` resides.
-
-3. Edit your cron jobs to execute the bash script.
+2. Edit your cron jobs to execute the bash script.
