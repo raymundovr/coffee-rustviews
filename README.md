@@ -17,13 +17,13 @@ Got time for a coffee? Why not reviewing some code while enjoying it?
 
 ## Configuration
 
-The presence of a configuration file is required. The [config.sample.json](config.sample.json) contains all possible configuration options needed to run the project.
+The presence of a configuration file is required. JSON and TOML  formats are supported. This file contains all possible configuration options needed to run the project. Refer to the sample files to get an overview of these options.
 
 ### Configuring Gitlab settings
 
 Before starting be sure to have obtained a [Gitlab API Token](https://docs.gitlab.com/ee/api/README.html#authentication) to authenticate the requests.
 
-Once you have the authentication token include it in the configuration file in the `gitlab` section. Example:
+Once you have the authentication token include it in the configuration file in the `gitlab` section. Example in JSON:
 
 ```json
 {
@@ -34,7 +34,11 @@ Once you have the authentication token include it in the configuration file in t
     [...]
 }
 ```
-Other configuration options are available, please check the [sample attached](config.sample.json) to this project.
+```toml
+gitlab.base_url = "https://gitlab.com/api/v4"
+gitlab.token = "your-token"
+```
+Other configuration options are available, please check the [JSON](config.sample.json) and [TOML](config.sample.toml) attached to this project.
 
 
 ### Posting to Slack
@@ -52,6 +56,9 @@ Once you have your webhook URL include it in the configuration file. Example:
     }
 }
 ```
+```toml
+publish.slack.webhook_url = "https://hooks.slack.com/yourappwebhook-url"
+```
 
 ### Posting to Microsoft Teams
 
@@ -68,14 +75,17 @@ Once you have registered the connector in your channel you can specify the url i
     }
 }
 ```
+```toml
+publish.teams.webhook_url = "https://domain.webhook.office.com/yourwebhookconnector-url"
+```
 
 ## Running the app
 
-Create a `config.json` file that includes all your configuration settings.
+Create a `config.json` or `config.toml` file that would include all your configuration settings.
 
 Then execute:
 
-`cargo run -- -c /path/to/config.json`
+`cargo run -- -c /path/to/configfile`
 
 This command will print a message indicating the Merge Requests posted and a confirmation on the number of messages posted (all merge requests go in one message).
 
@@ -89,7 +99,7 @@ And the corresponding message in your channel.
 
 ### Config file argument
 
-If you don't specify a path to your `config.json` using `-c /path/to/config.json` the program will assume that it resides in the current path.
+If you don't specify a path to your config file using `-c /path/to/configfile` the program will assume that a `config.json` resides in the current path.
 
 ### Salutation
 
@@ -114,6 +124,6 @@ This creates a target/release folder inside the project's folder that includes t
 
 For example
 ```bash
-0 9 * * *  /path/to/target/release/coffee-rustviews -c /path/to/config.json
+0 9 * * *  /path/to/target/release/coffee-rustviews -c /path/to/configfile
 ```
 Will execute the script everyday at 09:00 hrs.
