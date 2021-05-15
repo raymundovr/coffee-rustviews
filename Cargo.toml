@@ -1,6 +1,6 @@
 [package]
-name = "coffee-rustviews"
-version = "0.1.0"
+name = "coffee_rustviews"
+version = "0.2.0"
 authors = ["Raymundo Vásquez Ruiz <raymundo.vr@protonmail.com>"]
 edition = "2018"
 

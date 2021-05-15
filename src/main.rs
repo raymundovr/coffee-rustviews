@@ -1,9 +1,6 @@
-mod coffee_config;
-mod gitlab_client;
-mod post_message;
-use coffee_config::CoffeeConfig;
-use gitlab_client::MergeRequest;
-use post_message::*;
+use coffee_rustviews::coffee_config::CoffeeConfig;
+use coffee_rustviews::gitlab_client::MergeRequest;
+use coffee_rustviews::post_message::*;
 use clap::{App, Arg};
 
 #[tokio::main]

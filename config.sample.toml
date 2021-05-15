@@ -1,0 +1,12 @@
+# Required. Specify your own instance URL if necessary
+gitlab.base_url = "https://gitlab.com/api/v4"
+# Required. Your API Token
+gitlab.token = "your-token"
+# Optional. Include this if you want to include WIP Merge Requests
+gitlab.include_wip = true
+# Optional. Include only Merge Requests of the specified projects. Comma separated
+gitlab.projects = ["project_id"]
+# Optional. Your Slack webhook url
+publish.slack.webhook_url = "https://hooks.slack.com/yourappwebhook-url"
+# Optional. Your Teams webook url
+publish.teams.webhook_url = "https://domain.webhook.office.com/yourwebhookconnector-url"
