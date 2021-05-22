@@ -6,10 +6,14 @@
         "token": "" /* Required. Your API Token */
     },
     "publish": {
-        "slack": { /* Optional. Set Slack configuration if needed */
+        /* Optional. Your custom salution message. */
+        //"salutation": "Your salutation",
+        /* Optional. Set Slack configuration if needed */
+        "slack": {
             "webhook_url": "https://hooks.slack.com/yourappwebhook-url" 
         },
-        "teams": { /* Optional. Set MS Teams configuration if needed */
+        /* Optional. Set MS Teams configuration if needed */
+        "teams": {
             "webhook_url": "https://domain.webhook.office.com/yourwebhookconnector-url"
         }
     }

@@ -10,6 +10,7 @@ pub struct Gitlab {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Publish {
+    pub salutation: Option<String>,
     pub slack: Option<PublishChannel>,
     pub teams: Option<PublishChannel>,
 }

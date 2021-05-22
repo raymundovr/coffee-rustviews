@@ -10,3 +10,5 @@ gitlab.projects = ["project_id"]
 publish.slack.webhook_url = "https://hooks.slack.com/yourappwebhook-url"
 # Optional. Your Teams webook url
 publish.teams.webhook_url = "https://domain.webhook.office.com/yourwebhookconnector-url"
+# Optional. Your custom salution.
+publish.salutation = "Your salutation"

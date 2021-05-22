@@ -61,12 +61,20 @@ impl TeamsMessage {
     }
 }
 
+pub fn get_salutation(config: &Publish) -> &str {
+    match &config.salutation {
+        Some(message) => message,
+        None => "Hi! There are some Merge Requests to review :)",
+    }
+}
+
 pub async fn post_messages(
     merge_requests: &[MergeRequest],
     config: &Publish,
 ) -> Result<usize, Box<dyn std::error::Error>> {
     let mut success = 0;
-    let salutation = "Hi! There are some Merge Requests to review :)";
+    let salutation = get_salutation(config);
+
     if let Some(slack_config) = config.slack.clone() {
         println!("Posting message to Slack");
         let message = SlackMessage::new(salutation, merge_requests);
@@ -105,6 +113,7 @@ mod tests {
         });
 
         let config = Publish {
+            salutation: None,
             slack: Some(PublishChannel {
                 webhook_url: server.base_url().to_string(),
             }),
@@ -134,6 +143,7 @@ mod tests {
         });
 
         let config = Publish {
+            salutation: None,
             teams: Some(PublishChannel {
                 webhook_url: server.base_url().to_string(),
             }),
@@ -163,6 +173,7 @@ mod tests {
         });
 
         let config = Publish {
+            salutation: None,
             teams: Some(PublishChannel {
                 webhook_url: server.base_url().to_string(),
             }),
@@ -181,5 +192,27 @@ mod tests {
         let result = post_messages(&merge_requests, &config).await.unwrap();
         mock.assert();
         assert_eq!(result, 0);
+    }
+
+    #[test]
+    fn gets_salutation_when_defined_in_config() {
+        let config = Publish {
+            salutation: Some("Hey tests!".into()),
+            slack: None,
+            teams: None,
+        };
+
+        assert_eq!(get_salutation(&config), "Hey tests!");
+    }
+
+    #[test]
+    fn gets_salutation_when_not_defined_in_config() {
+        let config = Publish {
+            salutation: None,
+            slack: None,
+            teams: None,
+        };
+
+        assert_eq!(get_salutation(&config), "Hi! There are some Merge Requests to review :)");
     }
 }
