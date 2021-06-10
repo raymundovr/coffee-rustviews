@@ -49,14 +49,14 @@ impl TeamsMessage {
             .iter()
             .map(|mr| {
                 format!(
-                    "[{}]({}) by {} opened on __{}__. Upvotes: {}",
-                    mr.web_url, mr.title, mr.author.name, mr.created_at, mr.upvotes
+                    "- [{}]({}) by {} opened on __{}__. Upvotes: {}",
+                    mr.title, mr.web_url, mr.author.name, mr.created_at, mr.upvotes
                 )
             })
             .collect();
         TeamsMessage {
             title: title.to_string(),
-            text: messages.join("\n"),
+            text: messages.join("\r"),
         }
     }
 }
